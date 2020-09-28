@@ -24,7 +24,8 @@ class Routes
      * @param Request $request
      * @param JsonResponse $response
      */
-    public function __construct(Request $request, JsonResponse $response) {
+    public function __construct(Request $request, JsonResponse $response)
+    {
         $this->request = $request;
         $this->response = $response;
     }
@@ -34,8 +35,9 @@ class Routes
      *
      * @return  void
      */
-    public function registerHandlers() {
-        switch($this->request->getMethod()) {
+    public function registerHandlers()
+    {
+        switch ($this->request->getMethod()) {
             case 'GET':
                 $this->registerGet($this->request, $this->response);
                 break;
@@ -53,8 +55,9 @@ class Routes
      * @param Request $request
      * @param JsonResponse $response
      */
-    private function registerGet(Request $request, JsonResponse $response) {
-        switch($this->request->getPathInfo()) {
+    private function registerGet(Request $request, JsonResponse $response)
+    {
+        switch ($this->request->getPathInfo()) {
             case '/':
                 (new WelcomeController())->index($request, $response);
                 break;
@@ -69,8 +72,9 @@ class Routes
      * @param Request $request
      * @param JsonResponse $response
      */
-    private function registerPost(Request $request, JsonResponse $response) {
-        switch($request->getPathInfo()) {
+    private function registerPost(Request $request, JsonResponse $response)
+    {
+        switch ($request->getPathInfo()) {
             case '/':
                 $response->setData(['message' => 'post request to /'])->send();;
                 break;
@@ -86,11 +90,12 @@ class Routes
      * @param Request $request
      * @param JsonResponse $response
      */
-    private function notFound(Request $request, JsonResponse $response) {
+    private function notFound(Request $request, JsonResponse $response)
+    {
         $response->setStatusCode(Response::HTTP_NOT_FOUND)
             ->setData([
-                'status' => 'Failure',
-                'message' => 'Resource '. $request->getMethod() . ':' . $request->getPathInfo() .' not found']
+                    'status' => 'Failure',
+                    'message' => 'Resource ' . $request->getMethod() . ':' . $request->getPathInfo() . ' not found']
             )->send();
     }
 
