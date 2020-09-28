@@ -1,0 +1,19 @@
+{
+    "name": "oti4me/payment-api",
+    "description": "A simple payment api with recurring payment functionality",
+    "authors": [
+        {
+            "name": "Henry Otighe",
+            "email": "oti4me@gmail.com"
+        }
+    ],
+    "require": {
+        "symfony/http-foundation": "^5.1"
+    },
+    "autoload": {
+        "psr-4": {
+            "App\\": "src/"
+        },
+        "files": ["src/helper.php"]
+    }
+}
