@@ -62,4 +62,26 @@ class UserRepository
 
     }
 
+    public function userLogin($userInfo)
+    {
+        [$_, $error] = validateUserLoginInput($userInfo);
+
+        if ($error) return [null, $error];
+
+        $userRepository = $this->entityManager->getRepository('App\\Models\\User');
+
+        $user = $userRepository->findOneBy([
+            'email' => $userInfo['email']
+        ]);
+
+        if ($user && password_verify($userInfo['password'], $user->getPassword())) {
+            return [$user->toArray(), null];
+        }
+
+        return [
+            null,
+            ['status' => 'Failure', 'message' => 'Email or password incorrect', 'code' => Response::HTTP_BAD_REQUEST]
+        ];
+    }
+
 }

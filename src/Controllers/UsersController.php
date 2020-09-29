@@ -30,24 +30,34 @@ class UsersController
      */
     public function register(Request $request, Response $response)
     {
-        $body = json_decode($request->getContent(), true);
+        [$user, $error] = $this->userRepository->register($this->requestBodyToJson($request));
 
-        [$user, $error] = $this->userRepository->register($body);
+        if ($error) return response($response, $error, $error['code']);
 
-        if ($error) {
-            return $response->setStatusCode($error['code'])
-                ->setData([
-                    'status' => 'Failure',
-                    'body' => $error
-                ])->send();
-        }
+        return response($response, jwtEncode($user), Response::HTTP_CREATED);
+    }
 
-        return $response->setStatusCode(Response::HTTP_CREATED)
-            ->setData([
-                'status' => 'Success',
-                'body' => jwtEncode($user)
-            ])->send();
+    /**
+     * @param $request
+     * @return mixed
+     */
+    private function requestBodyToJson($request)
+    {
+        return json_decode($request->getContent(), true);
+    }
 
+    /**
+     * @param Request $request
+     * @param Response $response
+     * @return mixed
+     */
+    public function login(Request $request, Response $response)
+    {
+        [$user, $error] = $this->userRepository->userLogin($this->requestBodyToJson($request));
+
+        if ($error) return response($response, $error, $error['code']);
+
+        return response($response, jwtEncode($user));
     }
 
 }
