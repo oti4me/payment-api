@@ -1,0 +1,41 @@
+version: 2
+
+jobs:
+  build:
+    docker:
+      - image: circleci/php:7.4-node-browsers
+        environment:
+          - APP_ENV: testing
+          - DB_DRIVER: mysql
+          - DB_HOST: localhost
+          - DB_DATABASE: postgres
+          - DB_USERNAME: mysql
+          - DB_PASSWORD: postgres
+          - JWT_SECRET: secret
+      - image: circleci/mysql:8.0.4
+        environment:
+          - APP_ENV: testing
+          - MYSQL_ROOT_PASSWORD: secret
+          - MYSQL_USER: mysql
+          - MYSQL_PASSWORD: secret
+    working_directory: ~/app
+    steps:
+      - checkout
+      - run: sudo apt-get install -y libpq-dev
+      - run: sudo docker-php-ext-configure pgsql -with-pgsql=/usr/local/pgsql
+      - run: sudo docker-php-ext-install pdo pdo_pgsql pgsql
+      - run: sudo apt-get install -y libfreetype6-dev libjpeg62-turbo-dev libpng-dev && sudo docker-php-ext-configure gd --with-freetype-dir=/usr/include/ --with-jpeg-dir=/usr/include/ && sudo -E docker-php-ext-install -j$(nproc) gd
+      - add_ssh_keys:
+          fingerprints:
+            - "90:3f:3d:e3:93:4d:d4:13:fb:6e:30:96:df:eb:3b:a9"
+      - restore_cache:
+          keys:
+            - composer-v1-{{ checksum "composer.lock" }}
+            - compose-v1-
+      - run: composer install --no-interaction
+      - run: composer install --no-interaction
+      - save_cache:
+          key: composer-v1-{{ checksum "composer.lock" }}
+          paths:
+            - php vendor/bin/doctrine
+      - run: vendor/bin/phpunit --debug
