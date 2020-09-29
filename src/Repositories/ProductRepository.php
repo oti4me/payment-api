@@ -3,11 +3,15 @@
 
 namespace App\Repositories;
 
-
+use App\Models\Cart;
 use App\Models\Product;
 use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;
 
+/**
+ * Class ProductRepository
+ * @package App\Repositories
+ */
 class ProductRepository
 {
     private $entityManager;
@@ -20,7 +24,12 @@ class ProductRepository
         $this->entityManager = getEntityManager();
     }
 
-    public function addProduct($productDetails){
+    /**
+     * @param $productDetails
+     * @return array
+     */
+    public function addProduct($productDetails)
+    {
         [$_, $error] = validateProductCreationInput($productDetails);
 
         if ($error) return [null, $error];
@@ -37,6 +46,33 @@ class ProductRepository
             $this->entityManager->flush();
 
             return [$product->toArray(), null];
+        } catch (OptimisticLockException $e) {
+            var_dump($e);
+        } catch (ORMException $e) {
+            var_dump($e);
+        }
+    }
+
+    /**
+     * @param $productDetails
+     * @return array
+     */
+    public function addToCart($productDetails)
+    {
+        [$_, $error] = validateAddToCartInput($productDetails);
+
+        if($error) return [null, $error];
+
+        try {
+            $cart = new Cart();
+
+            $cart->setProductId($productDetails['productId']);
+            $cart->setUserId($productDetails['userId']);
+
+            $this->entityManager->persist($cart);
+            $this->entityManager->flush();
+
+            return [$cart->toArray(), null];
         } catch (OptimisticLockException $e) {
             var_dump($e);
         } catch (ORMException $e) {
