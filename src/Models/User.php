@@ -3,7 +3,9 @@
 namespace App\Models;
 
 use DateTime;
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\ORM\Mapping\OneToMany;
 
 /**
  * @ORM\Entity
@@ -48,13 +50,27 @@ class User
      */
     protected DateTime $updatedAt;
 
+//    /**
+//     * One User has Many products.
+//     * @OneToMany(targetEntity="Product", mappedBy="owner")
+//     */
+//    protected ArrayCollection $products;
+
+    /**
+     * User constructor.
+     */
+    public function __construct()
+    {
+        $this->products = new ArrayCollection();
+    }
+
     /**
      * Gets triggered only on insert
      * @ORM\PrePersist
      */
     public function onPrePersist()
     {
-        $this->createdAt = new DateTime("now");
+//        $this->createdAt = new DateTime("now");
     }
 
     /**

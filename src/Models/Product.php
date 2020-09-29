@@ -4,6 +4,8 @@ namespace App\Models;
 
 use DateTime;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\ORM\Mapping\JoinColumn;
+use Doctrine\ORM\Mapping\ManyToOne;
 
 /**
  * @ORM\Entity
@@ -47,6 +49,13 @@ class Product
      * @ORM\Column(type="datetime", nullable = true)
      */
     protected DateTime $updatedAt;
+
+//    /**
+//     * Many products have One user.
+//     * @ManyToOne(targetEntity="User")
+//     * @JoinColumn(name="owner", referencedColumnName="id")
+//     */
+//    protected $user;
 
     /**
      * Gets triggered only on insert
@@ -132,20 +141,20 @@ class Product
     }
 
     /**
+     * @return string
+     */
+    public function getOwner()
+    {
+        return $this->owner;
+    }
+
+    /**
      * @param $owner
      * @return void
      */
     public function setOwner($owner)
     {
         $this->owner = $owner;
-    }
-
-    /**
-     * @return string
-     */
-    public function getOwner()
-    {
-        return $this->owner;
     }
 
     /**

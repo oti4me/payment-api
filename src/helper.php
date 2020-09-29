@@ -4,6 +4,7 @@ require('vendor/autoload.php');
 
 use Firebase\JWT\JWT;
 use Symfony\Component\Dotenv\Dotenv;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Valitron\Validator;
 
@@ -40,11 +41,16 @@ function jwtEncode($data)
 
 /**
  * @param $data
- * @return object
+ * @return array
  */
 function jwtDecode($data)
 {
-    return JWT::decode($data, env('JWT_SECRET'), array('HS256'));
+    try {
+        return [JWT::decode($data, env('JWT_SECRET'), array('HS256')), null];
+    }
+    catch (Exception $e) {
+        return [null, $e];
+    }
 }
 
 /**
@@ -103,6 +109,18 @@ function validateProductCreationInput($data)
     return [null, null];
 }
 
+function validateAddToCartInput($data)
+{
+    $v = new Validator($data);
+    $v->rule('required', ['userId', 'productId']);
+
+    if (!$v->validate()) {
+        return [null, ['status' => 'Failure', 'message' => 'validation error', 'code' => Response::HTTP_UNPROCESSABLE_ENTITY, 'error' => $v->errors()]];
+    }
+
+    return [null, null];
+}
+
 /**
  * @param $response
  * @param $data
@@ -125,4 +143,24 @@ function response($response, $data, $statusCode = Response::HTTP_OK)
             'status' => $status,
             'body' => $data
         ])->send();
+}
+
+/**
+ * @param Request $request
+ * @param Response $response
+ * @param callable $callback
+ * @return mixed
+ */
+function isAuthenticated(Request $request) {
+    $token = $request->headers->get('authorization');
+
+    [$decoded, $error] = jwtDecode($token);
+
+    if($error) {
+        return false;
+    }
+
+    $request->user = $decoded->user;
+
+    return true;
 }

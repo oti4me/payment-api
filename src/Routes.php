@@ -114,11 +114,12 @@ class Routes
             case '/api/v1/products':
                 $this->productController->addProduct($request, $response);
                 break;
+            case '/api/v1/products/add-to-cart':
+                $this->productController->addToCart($request, $response);
+                break;
             default:
                 $this->notFound($request, $response);
 
         }
     }
-
-
 }
