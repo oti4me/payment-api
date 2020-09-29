@@ -87,6 +87,9 @@ class Routes
             case '/api/v1/register':
                 $this->userController->register($request, $response);
                 break;
+            case '/api/v1/login':
+                $this->userController->login($request, $response);
+                break;
             default:
                 $this->notFound($request, $response);
 

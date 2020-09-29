@@ -30,8 +30,8 @@ function jwtEncode($data)
         "iss" => 'localhost',
         'exp' => time() + 8.64e+7,
         "user" => [
-            'id' => $data['id'],
-            'email' => $data['email']
+            'id' => @$data['id'],
+            'email' => @$data['email']
         ],
     ];
 
@@ -65,4 +65,37 @@ function validateUserRegistrationInput($data)
     }
 
     return [null, null];
+}
+
+function validateUserLoginInput($data) {
+    $v = new Validator($data);
+    $v->rule('required', ['password', 'email']);
+    $v->rule('email', 'email');
+    $v->rule('lengthMin', 'password', 5);
+
+    if (!$v->validate()) {
+        return [null, ['status' => 'Failure', 'message' => 'validation error', 'code' => Response::HTTP_UNPROCESSABLE_ENTITY, 'error' => $v->errors()]];
+    }
+
+    return [null, null];
+}
+
+function response($response, $data, $statusCode = Response::HTTP_OK)
+{
+    $status = '';
+
+    switch ($statusCode) {
+        case Response::HTTP_OK:
+        case Response::HTTP_CREATED:
+            $status = 'Success';
+            break;
+        default:
+            $status = 'Failure';
+    }
+
+    return $response->setStatusCode($statusCode)
+        ->setData([
+            'status' => $status,
+            'body' => $data
+        ])->send();
 }
