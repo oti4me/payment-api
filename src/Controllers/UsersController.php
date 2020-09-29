@@ -6,7 +6,7 @@ use App\Repositories\UserRepository;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-class UsersController
+class UsersController extends BaseController
 {
     /**
      * @var UserRepository
@@ -35,15 +35,6 @@ class UsersController
         if ($error) return response($response, $error, $error['code']);
 
         return response($response, jwtEncode($user), Response::HTTP_CREATED);
-    }
-
-    /**
-     * @param $request
-     * @return mixed
-     */
-    private function requestBodyToJson($request)
-    {
-        return json_decode($request->getContent(), true);
     }
 
     /**

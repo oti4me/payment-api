@@ -67,7 +67,12 @@ function validateUserRegistrationInput($data)
     return [null, null];
 }
 
-function validateUserLoginInput($data) {
+/**
+ * @param $data
+ * @return array|null[]
+ */
+function validateUserLoginInput($data)
+{
     $v = new Validator($data);
     $v->rule('required', ['password', 'email']);
     $v->rule('email', 'email');
@@ -80,10 +85,32 @@ function validateUserLoginInput($data) {
     return [null, null];
 }
 
+/**
+ * @param $data
+ * @return array|null[]
+ */
+function validateProductCreationInput($data)
+{
+    $v = new Validator($data);
+    $v->rule('required', ['name', 'description', 'price', 'owner']);
+    $v->rule('lengthMin', 'name', 3);
+    $v->rule('lengthMin', 'description', 10);
+
+    if (!$v->validate()) {
+        return [null, ['status' => 'Failure', 'message' => 'validation error', 'code' => Response::HTTP_UNPROCESSABLE_ENTITY, 'error' => $v->errors()]];
+    }
+
+    return [null, null];
+}
+
+/**
+ * @param $response
+ * @param $data
+ * @param int $statusCode
+ * @return mixed
+ */
 function response($response, $data, $statusCode = Response::HTTP_OK)
 {
-    $status = '';
-
     switch ($statusCode) {
         case Response::HTTP_OK:
         case Response::HTTP_CREATED:
