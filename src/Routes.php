@@ -6,6 +6,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use App\Controllers\WelcomeController;
 use Symfony\Component\HttpFoundation\Response;
+use App\Controllers\UsersController;
 
 
 class Routes
@@ -18,6 +19,10 @@ class Routes
      * @var JsonResponse
      */
     private JsonResponse $response;
+    /**
+     * @var UsersController
+     */
+    private UsersController $userController;
 
     /**
      * Routes constructor.
@@ -28,6 +33,7 @@ class Routes
     {
         $this->request = $request;
         $this->response = $response;
+        $this->userController = new UsersController();
     }
 
     /**
@@ -77,6 +83,9 @@ class Routes
         switch ($request->getPathInfo()) {
             case '/':
                 $response->setData(['message' => 'post request to /'])->send();;
+                break;
+            case '/api/v1/register':
+                $this->userController->register($request, $response);
                 break;
             default:
                 $this->notFound($request, $response);
