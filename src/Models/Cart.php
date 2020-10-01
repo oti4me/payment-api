@@ -19,17 +19,6 @@ class Cart
      * @ORM\GeneratedValue
      */
     protected int $id;
-    /**
-     * @ORM\Column(type="integer")
-     */
-    protected string $productId;
-    /**
-     * @ORM\Column(type="string")
-     */
-    protected string $userId;
-    /**
-     * @ORM\Column(type="integer")
-     */
 
     /**
      * Gets triggered only on insert
@@ -39,6 +28,20 @@ class Cart
     {
         $this->createdAt = new DateTime("now");
     }
+
+    /**
+     * Many Cart items have One user.
+     * @ORM\ManyToOne  (targetEntity="User", inversedBy="cart", cascade={"persist"}, fetch="EAGER")
+     * @ORM\JoinColumn(name="user_id", referencedColumnName="id")
+     */
+    protected $user;
+
+    /**
+     * Many Cart items have One user.
+     * @ORM\ManyToOne (targetEntity="Product", inversedBy="cart", cascade={"persist"}, fetch="EAGER")
+     * @ORM\JoinColumn(name="product_id", referencedColumnName="id")
+     */
+    protected $product;
 
     /**
      * Gets triggered every time on update
@@ -66,35 +69,39 @@ class Cart
     }
 
     /**
-     * @return integer
+     * @return Product
      */
-    public function getProductId()
+    public function getProduct()
     {
-        return $this->productId;
+        return $this->product;
     }
 
     /**
-     * @param $productId
+     * @param Product $product
+     * @return Cart
      */
-    public function setProductId($productId)
+    public function setProduct(Product $product)
     {
-        $this->productId = $productId;
+        $this->product = $product;
+        return $this;
     }
 
     /**
-     * @return string
+     * @return User
      */
-    public function getUserId()
+    public function getUser()
     {
-        return $this->userId;
+        return $this->user;
     }
 
     /**
-     * @param integer
+     * @param User $user
+     * @return Cart
      */
-    public function setUserId($userId)
+    public function setUser(User $user)
     {
-        $this->userId = $userId;
+        $this->user = $user;
+        return $this;
     }
 
     /**

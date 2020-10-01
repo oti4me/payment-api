@@ -17,7 +17,8 @@
         "firebase/php-jwt": "^5.2",
         "vlucas/valitron": "^1.4",
         "guzzlehttp/guzzle": "^7.1",
-        "fzaninotto/faker": "^1.9"
+        "fzaninotto/faker": "^1.9",
+        "flutterwavedev/flutterwave-php": "^1.2"
     },
     "autoload": {
         "psr-4": {

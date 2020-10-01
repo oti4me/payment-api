@@ -7,7 +7,7 @@ use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\ORMException;
 use Symfony\Component\HttpFoundation\Response;
 
-class UserRepository
+class UserRepository extends BaseRepository
 {
     private EntityManager $entityManager;
 
@@ -73,6 +73,9 @@ class UserRepository
         $user = $userRepository->findOneBy([
             'email' => $userInfo['email']
         ]);
+
+        var_dump($user->getProducts());
+
 
         if ($user && password_verify($userInfo['password'], $user->getPassword())) {
             return [$user->toArray(), null];

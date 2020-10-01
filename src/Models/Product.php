@@ -32,10 +32,6 @@ class Product
      * @ORM\Column(type="integer")
      */
     protected string $price;
-    /**
-     * @ORM\Column(type="integer")
-     */
-    protected string $owner;
 
     /**
      * @var DateTime $createdAt
@@ -50,12 +46,24 @@ class Product
      */
     protected DateTime $updatedAt;
 
-//    /**
-//     * Many products have One user.
-//     * @ManyToOne(targetEntity="User")
-//     * @JoinColumn(name="owner", referencedColumnName="id")
-//     */
-//    protected $user;
+    /**
+     * Many products have One user.
+     * @ORM\ManyToOne(targetEntity="User", inversedBy="products", cascade={"persist"})
+     * @ORM\JoinColumn(name="user_id", referencedColumnName="id")
+     */
+    protected $user;
+
+    /**
+     * @var string
+     * @ORM\Column(type="string")
+     */
+    protected string $imageUrl;
+
+    /**
+     * One product has Many one cart.
+     * @ORM\OneToMany (targetEntity="Cart", mappedBy="product_id")
+     */
+    protected $cart;
 
     /**
      * Gets triggered only on insert
@@ -73,6 +81,24 @@ class Product
     public function onPostPersist()
     {
         $this->updatedAt = new DateTime("now");
+    }
+
+    /**
+     * @return string
+     */
+    public function getImageUrl()
+    {
+        return $this->imageUrl;
+    }
+
+    /**
+     * @param $imageUrl
+     * @return string
+     */
+    public function setImageUrl($imageUrl)
+    {
+        $this->imageUrl = $imageUrl;
+        return $this;
     }
 
     /**
@@ -105,6 +131,7 @@ class Product
     public function setName($name)
     {
         $this->name = $name;
+        return $this;
     }
 
     /**
@@ -121,6 +148,7 @@ class Product
     public function setPrice($price)
     {
         $this->price = $price;
+        return $this;
     }
 
     /**
@@ -138,23 +166,25 @@ class Product
     public function setDescription($description)
     {
         $this->description = $description;
+        return $this;
     }
 
     /**
-     * @return string
+     * @return User $user
      */
-    public function getOwner()
+    public function getUser()
     {
-        return $this->owner;
+        return $this->user;
     }
 
     /**
-     * @param $owner
-     * @return void
+     * @param User $user
+     * @return Product
      */
-    public function setOwner($owner)
+    public function setUser(User $user)
     {
-        $this->owner = $owner;
+        $this->user = $user;
+        return $this;
     }
 
     /**
@@ -163,5 +193,21 @@ class Product
     public function toArray()
     {
         return get_object_vars($this);
+    }
+
+    /**
+     * @return string
+     */
+    public function __toString()
+    {
+        return (string)$this->getId();
+    }
+
+    /**
+     * @return int
+     */
+    public function getId()
+    {
+        return $this->id;
     }
 }

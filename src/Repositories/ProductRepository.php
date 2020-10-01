@@ -12,7 +12,7 @@ use Doctrine\ORM\ORMException;
  * Class ProductRepository
  * @package App\Repositories
  */
-class ProductRepository
+class ProductRepository extends BaseRepository
 {
     private $entityManager;
 
@@ -37,19 +37,20 @@ class ProductRepository
         try {
             $product = new Product();
 
-            $product->setName($productDetails['name']);
-            $product->setDescription($productDetails['description']);
-            $product->setPrice($productDetails['price']);
-            $product->setOwner($productDetails['owner']);
+            $product = $product->setName($productDetails['name'])
+                ->setDescription($productDetails['description'])
+                ->setPrice($productDetails['price'])
+                ->setUser($this->getUser($productDetails['userId']))
+                ->setImageUrl($productDetails['imageUrl']);
 
             $this->entityManager->persist($product);
             $this->entityManager->flush();
 
             return [$product->toArray(), null];
         } catch (OptimisticLockException $e) {
-            var_dump($e);
+            return [null, $e];
         } catch (ORMException $e) {
-            var_dump($e);
+            return [null, $e];
         }
     }
 
@@ -61,22 +62,70 @@ class ProductRepository
     {
         [$_, $error] = validateAddToCartInput($productDetails);
 
-        if($error) return [null, $error];
+        if ($error) return [null, $error];
 
         try {
             $cart = new Cart();
 
-            $cart->setProductId($productDetails['productId']);
-            $cart->setUserId($productDetails['userId']);
+            $cart->setProduct($this->getProduct($productDetails['productId']));
+            $cart->setUser($this->getUser($productDetails['userId']));
 
             $this->entityManager->persist($cart);
             $this->entityManager->flush();
 
             return [$cart->toArray(), null];
         } catch (OptimisticLockException $e) {
-            var_dump($e);
+            return [null, $e];
         } catch (ORMException $e) {
-            var_dump($e);
+            return [null, $e];
         }
+    }
+
+    /**
+     * @param $userId
+     * @return array
+     */
+    public function getUserCart($userId)
+    {
+        try {
+            $cart = $this->getUser($userId)->getCart();
+
+            dd(json_encode($cart));
+            return [$cart, null];
+        } catch (OptimisticLockException $e) {
+            return [null, $e];
+        } catch (ORMException $e) {
+            return [null, $e];
+        }
+    }
+
+    public function getProducts()
+    {
+        try {
+            $products = $this->getAllProducts();
+
+            return [toArray($products), null];
+        } catch (OptimisticLockException $e) {
+            return [null, $e];
+        } catch (ORMException $e) {
+            return [null, $e];
+        }
+    }
+
+    /**
+     * @param $userId
+     * @return array
+     */
+    public function checkout($cart)
+    {
+//        try {
+//            $cart = $this->getCartBy('userId', $userId);
+//
+//            return [toArray($cart), null];
+//        } catch (OptimisticLockException $e) {
+//            var_dump($e);
+//        } catch (ORMException $e) {
+//            var_dump($e);
+//        }
     }
 }

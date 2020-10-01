@@ -47,8 +47,7 @@ function jwtDecode($data)
 {
     try {
         return [JWT::decode($data, env('JWT_SECRET'), array('HS256')), null];
-    }
-    catch (Exception $e) {
+    } catch (Exception $e) {
         return [null, $e];
     }
 }
@@ -98,7 +97,7 @@ function validateUserLoginInput($data)
 function validateProductCreationInput($data)
 {
     $v = new Validator($data);
-    $v->rule('required', ['name', 'description', 'price', 'owner']);
+    $v->rule('required', ['name', 'description', 'price', 'imageUrl']);
     $v->rule('lengthMin', 'name', 3);
     $v->rule('lengthMin', 'description', 10);
 
@@ -109,10 +108,14 @@ function validateProductCreationInput($data)
     return [null, null];
 }
 
+/**
+ * @param $data
+ * @return array|null[]
+ */
 function validateAddToCartInput($data)
 {
     $v = new Validator($data);
-    $v->rule('required', ['userId', 'productId']);
+    $v->rule('required', ['productId']);
 
     if (!$v->validate()) {
         return [null, ['status' => 'Failure', 'message' => 'validation error', 'code' => Response::HTTP_UNPROCESSABLE_ENTITY, 'error' => $v->errors()]];
@@ -147,20 +150,64 @@ function response($response, $data, $statusCode = Response::HTTP_OK)
 
 /**
  * @param Request $request
- * @param Response $response
- * @param callable $callback
  * @return mixed
  */
-function isAuthenticated(Request $request) {
+function isAuthenticated(Request $request)
+{
     $token = $request->headers->get('authorization');
 
     [$decoded, $error] = jwtDecode($token);
 
-    if($error) {
+    if ($error) {
         return false;
     }
 
     $request->user = $decoded->user;
 
     return true;
+}
+
+/**
+ * @param $object
+ * @return array
+ */
+function toArray($object)
+{
+    $result = [];
+
+    foreach ($object as $value) {
+        if(is_object($value)) {
+            array_push($result, $value->toArray());
+        }
+    }
+
+    return $result;
+}
+
+/**
+ * @param $data
+ */
+function dump($data)
+{
+    error_log('==== Log Start ====', 0);
+    error_log($data, 0);
+    error_log('==== Log End ====', 0);
+}
+
+/**
+ * @param $req
+ */
+function setCorsHeaders($response)
+{
+    $response->headers->set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    $response->headers->set('Access-Control-Allow-Origin', '*');
+    $response->headers->set('Access-Control-Allow-Headers', 'content-type, Authorization');
+}
+
+/**
+ * @param $data
+ */
+function dd($data) {
+    var_dump($data);
+    die;
 }
