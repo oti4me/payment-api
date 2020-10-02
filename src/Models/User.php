@@ -2,170 +2,39 @@
 
 namespace App\Models;
 
-use DateTime;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\ORM\Mapping as ORM;
-use Doctrine\ORM\Mapping\OneToMany;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 /**
- * @ORM\Entity
- * @ORM\Table(name="users")
- * @ORM\HasLifecycleCallbacks()
+ * Class User
+ * @package App\Models
  */
-class User
+class User extends Model
 {
     /**
-     * @ORM\Id
-     * @ORM\Column(type="integer")
-     * @ORM\GeneratedValue
+     * @var string[]
      */
-    protected int $id;
-    /**
-     * @ORM\Column(type="string")
-     */
-    protected string $firstName;
-    /**
-     * @ORM\Column(type="string")
-     */
-    protected string $lastName;
-    /**
-     * @ORM\Column(type="string")
-     */
-    protected string $email;
-    /**
-     * @ORM\Column(type="string")
-     */
-    protected string $password;
+    protected $fillable = ['firstName', 'lastName', 'email', 'password'];
 
     /**
-     * @var DateTime $createdAt
-     *
-     * @ORM\Column(type="datetime", nullable = true)
+     * @var string[]
      */
-    protected DateTime $createdAt;
+    protected $hidden = ['password'];
 
     /**
-     * @var DateTime $updatedAt
-     * @ORM\Column(type="datetime", nullable = true)
+     * @return HasOne
      */
-    protected DateTime $updatedAt;
-
-//    /**
-//     * One User has Many products.
-//     * @OneToMany(targetEntity="Product", mappedBy="owner")
-//     */
-//    protected ArrayCollection $products;
-
-    /**
-     * User constructor.
-     */
-    public function __construct()
+    public function products()
     {
-        $this->products = new ArrayCollection();
+        return $this->hasOne('App\Models\Product');
     }
 
     /**
-     * Gets triggered only on insert
-     * @ORM\PrePersist
+     * @return HasMany
      */
-    public function onPrePersist()
+    public function carts()
     {
-//        $this->createdAt = new DateTime("now");
-    }
-
-    /**
-     * Gets triggered every time on update
-     * @ORM\PreUpdate
-     */
-    public function onPostPersist()
-    {
-        $this->updatedAt = new DateTime("now");
-    }
-
-    /**
-     * @return string
-     */
-    public function getCreatedAt()
-    {
-        return $this->createdAt;
-    }
-
-    /**
-     * @return string
-     */
-    public function getUpdatedAt()
-    {
-        return $this->updatedAt;
-    }
-
-    /**
-     * @return string
-     */
-    public function getFirstName()
-    {
-        return $this->firstName;
-    }
-
-    /**
-     * @param $firstName
-     */
-    public function setFirstName($firstName)
-    {
-        $this->firstName = $firstName;
-    }
-
-    /**
-     * @return string
-     */
-    public function getLastName()
-    {
-        return $this->lastName;
-    }
-
-    /**
-     * @param $lastName
-     */
-    public function setLastName($lastName)
-    {
-        $this->lastName = $lastName;
-    }
-
-    /**
-     * @return string
-     */
-    public function getEmail()
-    {
-        return $this->email;
-    }
-
-    /**
-     * @param $email
-     */
-    public function setEmail($email)
-    {
-        $this->email = $email;
-    }
-
-    /**
-     * @return string
-     */
-    public function getPassword()
-    {
-        return $this->password;
-    }
-
-    /**
-     * @param $password
-     */
-    public function setPassword($password)
-    {
-        $this->password = $password;
-    }
-
-    /**
-     * @return array
-     */
-    public function toArray() {
-        return get_object_vars($this);
+        return $this->hasMany('App\Models\Cart');
     }
 }

@@ -2,52 +2,31 @@
 
 require('vendor/autoload.php');
 
-use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\Response;
 use Doctrine\ORM\Tools\Setup;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\ORMException;
+use Illuminate\Database\Capsule\Manager as Capsule;
 
 /**
- * Creates and return db object
- *
- * @return PDO
+ * Create an set global the database configuration
  */
-function getDB()
+function connectDB()
 {
-    $dsn = env('DB_DRIVER') . ':dbname=' . env('DB_DATABASE') . ';host=' . env('DB_HOST');
+    $capsule = new Capsule();
 
-    try {
-        return new PDO($dsn, env('DB_USERNAME'), env('DB_PASSWORD'));
-    } catch (PDOException $e) {
-        (new JsonResponse())->setStatusCode(Response::HTTP_INTERNAL_SERVER_ERROR)
-            ->setData([
-                'status' => 'Failure',
-                'message' => $e->getMessage()
-            ])->send();
-    }
+    $capsule->addConnection([
+        'driver'    => 'mysql',
+        'host'      => '127.0.0.1',
+        'username'  => 'root',
+        'password'  => 'otighe',
+        'database'  => 'eloquent',
+        'charset'   => 'utf8',
+        'collation' => 'utf8_unicode_ci',
+        'prefix'    => '',
+    ]);
+
+    $capsule->setAsGlobal();
+
+    $capsule->bootEloquent();
 }
 
-/**
- * Returns an entity of manager object
- *
- * @return EntityManager
- */
-function getEntityManager()
-{
-    $config = Setup::createAnnotationMetadataConfiguration(array(getcwd() . '/src/Models'), true, null, null, false);
-
-    $dbInfo = [
-        'dbname' => env('DB_DATABASE'),
-        'user' => env('DB_USERNAME'),
-        'password' => env('DB_PASSWORD'),
-        'host' => env('DB_HOST'),
-        'driver' => 'pdo_mysql',
-    ];
-
-    try {
-        return EntityManager::create($dbInfo, $config);
-    } catch (ORMException $e) {
-        var_dump($e);
-    }
-}

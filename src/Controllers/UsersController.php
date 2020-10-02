@@ -30,11 +30,12 @@ class UsersController extends BaseController
      */
     public function register(Request $request, Response $response)
     {
-        [$user, $error] = $this->userRepository->register($this->requestBodyToJson($request));
+        [$user, $error] = $this->userRepository
+            ->register($this->requestBodyToJson($request));
 
-        if ($error) return response($response, $error, $error['code']);
-
-        return response($response, jwtEncode($user), Response::HTTP_CREATED);
+        return ($error == null) ?
+            response($response, jwtEncode($user), Response::HTTP_CREATED) :
+            response($response, $error, $error['code']);
     }
 
     /**
@@ -44,11 +45,12 @@ class UsersController extends BaseController
      */
     public function login(Request $request, Response $response)
     {
-        [$user, $error] = $this->userRepository->userLogin($this->requestBodyToJson($request));
+        [$user, $error] = $this->userRepository
+            ->userLogin($this->requestBodyToJson($request));
 
-        if ($error) return response($response, $error, $error['code']);
-
-        return response($response, jwtEncode($user));
+        return ($error == null) ?
+            response($response, jwtEncode($user)) :
+            response($response, $error, $error['code']);
     }
 
 }

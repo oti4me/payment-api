@@ -6,8 +6,7 @@ use App\Routes;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\JsonResponse;
 
-$projectDir = __DIR__;
-
+connectDB();
 
 $request = Request::createFromGlobals();
 
