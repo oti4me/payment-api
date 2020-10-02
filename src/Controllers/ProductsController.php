@@ -1,6 +1,5 @@
 <?php
 
-
 namespace App\Controllers;
 
 use App\Repositories\ProductRepository;
@@ -29,13 +28,15 @@ class ProductsController extends BaseController
      */
     public function addProduct(Request $request, Response $response)
     {
-        if (!isAuthenticated($request)) return response($response, 'Unauthorised', Response::HTTP_UNAUTHORIZED);
+        if (!isAuthenticated($request))
+            return $this->unauthorised($response);
 
-        [$product, $error] = $this->productRepository->addProduct($this->requestBodyToJson($request));
+        [$product, $error] = $this->productRepository
+            ->addProduct($this->requestBodyToJson($request), $request);
 
-        if ($error) return response($response, $error, $error['code']);
-
-        return response($response, $product, Response::HTTP_CREATED);
+        return ($error == null) ?
+            response($response, $product, Response::HTTP_CREATED) :
+            response($response, $error, $error['code']);
     }
 
     /**
@@ -45,13 +46,15 @@ class ProductsController extends BaseController
      */
     public function addToCart(Request $request, Response $response)
     {
-        if (!isAuthenticated($request)) return response($response, 'Unauthorised', Response::HTTP_UNAUTHORIZED);
+        if (!isAuthenticated($request))
+            return $this->unauthorised($response);
 
-        [$product, $error] = $this->productRepository->addToCart($this->requestBodyToJson($request));
+        [$product, $error] = $this->productRepository
+            ->addToCart($this->requestBodyToJson($request), $request);
 
-        if ($error) return response($response, $error, $error['code']);
-
-        return response($response, $product, Response::HTTP_CREATED);
+        return ($error == null) ?
+            response($response, $product, Response::HTTP_CREATED) :
+            response($response, $error, $error['code']);
     }
 
 }

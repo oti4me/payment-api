@@ -12,16 +12,6 @@ $dotenv = new Dotenv();
 $dotenv->load(__DIR__ . '/../.env');
 
 /**
- * @param $variable
- * @param null $default
- * @return mixed|null
- */
-function env($variable, $default = null)
-{
-    return $_ENV[$variable] ?? $default;
-}
-
-/**
  * @param $data
  * @return string
  */
@@ -30,10 +20,7 @@ function jwtEncode($data)
     $payload = [
         "iss" => 'localhost',
         'exp' => time() + 8.64e+7,
-        "user" => [
-            'id' => @$data['id'],
-            'email' => @$data['email']
-        ],
+        "user" => [ 'id' => @$data['id'],  'email' => @$data['email'] ],
     ];
 
     return JWT::encode($payload, env('JWT_SECRET'));
@@ -98,9 +85,10 @@ function validateUserLoginInput($data)
 function validateProductCreationInput($data)
 {
     $v = new Validator($data);
-    $v->rule('required', ['name', 'description', 'price', 'owner']);
+    $v->rule('required', ['name', 'description', 'price', 'image_url']);
     $v->rule('lengthMin', 'name', 3);
     $v->rule('lengthMin', 'description', 10);
+    $v->rule('lengthMin', 'description', 4);
 
     if (!$v->validate()) {
         return [null, ['status' => 'Failure', 'message' => 'validation error', 'code' => Response::HTTP_UNPROCESSABLE_ENTITY, 'error' => $v->errors()]];
@@ -109,16 +97,23 @@ function validateProductCreationInput($data)
     return [null, null];
 }
 
+/**
+ * @param $data
+ * @return array|null[]
+ */
 function validateAddToCartInput($data)
 {
     $v = new Validator($data);
-    $v->rule('required', ['userId', 'productId']);
 
-    if (!$v->validate()) {
-        return [null, ['status' => 'Failure', 'message' => 'validation error', 'code' => Response::HTTP_UNPROCESSABLE_ENTITY, 'error' => $v->errors()]];
-    }
+    $v->rule('required', ['product_id']);
 
-    return [null, null];
+    return (!$v->validate()) ?
+        [null, [
+            'status' => 'Failure',
+            'message' => 'validation error',
+            'code' => Response::HTTP_UNPROCESSABLE_ENTITY,
+            'error' => $v->errors()]] :
+        [null, null];
 }
 
 /**
@@ -156,9 +151,7 @@ function isAuthenticated(Request $request) {
 
     [$decoded, $error] = jwtDecode($token);
 
-    if($error) {
-        return false;
-    }
+    if($error) return false;
 
     $request->user = $decoded->user;
 

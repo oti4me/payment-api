@@ -5,8 +5,8 @@ namespace App\Repositories;
 
 use App\Models\Cart;
 use App\Models\Product;
-use Doctrine\ORM\OptimisticLockException;
-use Doctrine\ORM\ORMException;
+use App\Models\User;
+use Exception;
 
 /**
  * Class ProductRepository
@@ -14,42 +14,30 @@ use Doctrine\ORM\ORMException;
  */
 class ProductRepository
 {
-    private $entityManager;
-
-    /**
-     * ProductRepository constructor.
-     */
-    public function __construct()
-    {
-        $this->entityManager = getEntityManager();
-    }
-
     /**
      * @param $productDetails
+     * @param $request
      * @return array
      */
-    public function addProduct($productDetails)
+    public function addProduct($productDetails, $request)
     {
         [$_, $error] = validateProductCreationInput($productDetails);
 
         if ($error) return [null, $error];
 
         try {
-            $product = new Product();
-
-            $product->setName($productDetails['name']);
-            $product->setDescription($productDetails['description']);
-            $product->setPrice($productDetails['price']);
-            $product->setOwner($productDetails['owner']);
-
-            $this->entityManager->persist($product);
-            $this->entityManager->flush();
+            $product = User::find($request->user->id)
+                ->products()
+                ->save(new Product([
+                    'name' => $productDetails['name'],
+                    'description' => $productDetails['description'],
+                    'price' => $productDetails['price'],
+                    'image_url' => $productDetails['image_url'],
+                ]));
 
             return [$product->toArray(), null];
-        } catch (OptimisticLockException $e) {
-            var_dump($e);
-        } catch (ORMException $e) {
-            var_dump($e);
+        } catch (Exception $e) {
+            return [null, $e];
         }
     }
 
@@ -57,26 +45,20 @@ class ProductRepository
      * @param $productDetails
      * @return array
      */
-    public function addToCart($productDetails)
+    public function addToCart($productDetails, $request)
     {
         [$_, $error] = validateAddToCartInput($productDetails);
 
-        if($error) return [null, $error];
+        if ($error) return [null, $error];
 
         try {
-            $cart = new Cart();
-
-            $cart->setProductId($productDetails['productId']);
-            $cart->setUserId($productDetails['userId']);
-
-            $this->entityManager->persist($cart);
-            $this->entityManager->flush();
+            $cart = User::find($request->user->id)
+                ->carts()
+                ->save(new Cart(['product_id' => $productDetails['product_id']]));
 
             return [$cart->toArray(), null];
-        } catch (OptimisticLockException $e) {
-            var_dump($e);
-        } catch (ORMException $e) {
-            var_dump($e);
+        } catch (Exception $e) {
+            return [null, $e];
         }
     }
 }
