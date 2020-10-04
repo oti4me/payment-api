@@ -12,6 +12,8 @@ $request = Request::createFromGlobals();
 
 $response = new JsonResponse();
 
+setCorsHeaders($response);
+
 $routes = new Routes($request, $response);
 
 $routes->registerHandlers();

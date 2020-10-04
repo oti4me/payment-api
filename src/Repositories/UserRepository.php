@@ -5,7 +5,7 @@ namespace App\Repositories;
 use Symfony\Component\HttpFoundation\Response;
 use App\Models\User;
 
-class UserRepository
+class UserRepository extends BaseRepository
 {
     /**
      * Inserts user record to the database
