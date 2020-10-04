@@ -2,9 +2,6 @@
 
 require('vendor/autoload.php');
 
-use Doctrine\ORM\Tools\Setup;
-use Doctrine\ORM\EntityManager;
-use Doctrine\ORM\ORMException;
 use Illuminate\Database\Capsule\Manager as Capsule;
 use GuzzleHttp\Client;
 

@@ -162,24 +162,6 @@ function isAuthenticated(Request $request)
 }
 
 /**
- * @param $object
- * @return array
- */
-function toArray($object)
-{
-    $result = [];
-
-    foreach ($object as $value) {
-        if(is_object($value)) {
-            array_push($result, $value->toArray());
-        }
-    }
-
-    return $result;
-}
-
-
-/**
  * @param $req
  */
 function setCorsHeaders($response)
