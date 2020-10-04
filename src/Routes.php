@@ -56,6 +56,9 @@ class Routes
             case 'POST':
                 $this->registerPost($this->request, $this->response);
                 break;
+            case 'OPTIONS':
+                $this->response->setStatusCode(Response::HTTP_OK)->send();
+                break;
             default:
                 $this->response->setStatusCode(Response::HTTP_METHOD_NOT_ALLOWED)->send();
         }
@@ -72,6 +75,12 @@ class Routes
         switch ($this->request->getPathInfo()) {
             case '/':
                 (new WelcomeController())->index($request, $response);
+                break;
+            case '/api/v1/products/cart':
+                $this->productController->viewCart($request, $response);
+                break;
+            case '/api/v1/products':
+                $this->productController->getProducts($request, $response);
                 break;
             default:
                 $this->notFound($request, $response);
@@ -117,9 +126,13 @@ class Routes
             case '/api/v1/products/add-to-cart':
                 $this->productController->addToCart($request, $response);
                 break;
+            case '/api/v1/verify-payment':
+                $this->productController->verifyPayment($request, $response);
+                break;
             default:
                 $this->notFound($request, $response);
 
         }
     }
 }
+

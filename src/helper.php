@@ -20,7 +20,12 @@ function jwtEncode($data)
     $payload = [
         "iss" => 'localhost',
         'exp' => time() + 8.64e+7,
-        "user" => [ 'id' => @$data['id'],  'email' => @$data['email'] ],
+        "user" => [
+            'id' => $data['id'],
+            'email' => $data['email'],
+            'firstName' => $data['firstName'],
+            'lastName' => $data['lastName']
+        ],
     ];
 
     return JWT::encode($payload, env('JWT_SECRET'));
@@ -88,7 +93,6 @@ function validateProductCreationInput($data)
     $v->rule('required', ['name', 'description', 'price', 'image_url']);
     $v->rule('lengthMin', 'name', 3);
     $v->rule('lengthMin', 'description', 10);
-    $v->rule('lengthMin', 'description', 4);
 
     if (!$v->validate()) {
         return [null, ['status' => 'Failure', 'message' => 'validation error', 'code' => Response::HTTP_UNPROCESSABLE_ENTITY, 'error' => $v->errors()]];
@@ -142,18 +146,27 @@ function response($response, $data, $statusCode = Response::HTTP_OK)
 
 /**
  * @param Request $request
- * @param Response $response
- * @param callable $callback
  * @return mixed
  */
-function isAuthenticated(Request $request) {
+function isAuthenticated(Request $request)
+{
     $token = $request->headers->get('authorization');
 
     [$decoded, $error] = jwtDecode($token);
 
-    if($error) return false;
+    if ($error) return false;
 
     $request->user = $decoded->user;
 
     return true;
+}
+
+/**
+ * @param $req
+ */
+function setCorsHeaders($response)
+{
+    $response->headers->set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    $response->headers->set('Access-Control-Allow-Origin', '*');
+    $response->headers->set('Access-Control-Allow-Headers', 'content-type, Authorization');
 }

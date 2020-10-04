@@ -4,6 +4,7 @@
 namespace App\Repositories;
 
 use App\Models\Cart;
+use App\Models\Payment;
 use App\Models\Product;
 use App\Models\User;
 use Exception;
@@ -12,7 +13,7 @@ use Exception;
  * Class ProductRepository
  * @package App\Repositories
  */
-class ProductRepository
+class ProductRepository extends BaseRepository
 {
     /**
      * @param $productDetails
@@ -59,6 +60,44 @@ class ProductRepository
             return [$cart->toArray(), null];
         } catch (Exception $e) {
             return [null, $e];
+        }
+    }
+
+    /**
+     * @param $paymentDetails
+     * @param $request
+     * @return array
+     */
+    public function updatePayment($paymentDetails, $request)
+    {
+        $Ids = $paymentDetails
+            ->metadata
+            ->custom_fields
+            ->ids;
+
+        $productIds = array_column($Ids, 'productIds');
+
+        try {
+            $payment = Payment::create([
+                'user_id'           => $request->user->id,
+                'transaction_id'    => $paymentDetails->id,
+                'reference'         => $paymentDetails->reference,
+                'amount'            => $paymentDetails->amount,
+                'payment_type'      => $paymentDetails->channel,
+                'currency'          => $paymentDetails->currency,
+                'customer_id'       => $paymentDetails->customer->id,
+                'product_ids'       => implode(',', $productIds)
+            ]);
+
+          $carts = $this->getCartsByIds('id', array_column($Ids, 'cartIds'));
+
+            foreach ($carts as $cart) {
+                $cart->delete();
+            }
+
+            return [$payment->toArray(), null];
+        } catch (Exception $e) {
+            [null, $e];
         }
     }
 }
