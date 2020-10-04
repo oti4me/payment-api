@@ -126,6 +126,9 @@ class Routes
             case '/api/v1/products/add-to-cart':
                 $this->productController->addToCart($request, $response);
                 break;
+            case '/api/v1/verify-payment':
+                $this->productController->verifyPayment($request, $response);
+                break;
             default:
                 $this->notFound($request, $response);
 

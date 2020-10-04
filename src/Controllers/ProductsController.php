@@ -1,9 +1,9 @@
 <?php
 
-
 namespace App\Controllers;
 
 use App\Repositories\ProductRepository;
+use GuzzleHttp\Exception\GuzzleException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -34,15 +34,14 @@ class ProductsController extends BaseController
     public function addProduct(Request $request, Response $response)
     {
         if (!isAuthenticated($request))
-            return response($response, 'Unauthorised', Response::HTTP_UNAUTHORIZED);
+            return $this->unauthorised($response);
 
-        $productDetails = array_merge($this->requestBodyToJson($request), ['userId'=>$request->user->id]);
+        [$product, $error] = $this->productRepository
+            ->addProduct($this->requestBodyToJson($request), $request);
 
-        [$product, $error] = $this->productRepository->addProduct($productDetails);
-
-        if ($error) return response($response, $error, $error['code']);
-
-        return response($response, $product, Response::HTTP_CREATED);
+        return ($error == null) ?
+            response($response, $product, Response::HTTP_CREATED) :
+            response($response, $error, $error['code']);
     }
 
     /**
@@ -52,15 +51,15 @@ class ProductsController extends BaseController
      */
     public function addToCart(Request $request, Response $response)
     {
-        if (!isAuthenticated($request)) return response($response, 'Unauthorised', Response::HTTP_UNAUTHORIZED);
+        if (!isAuthenticated($request))
+            return $this->unauthorised($response);
 
-        $userDetails = array_merge($this->requestBodyToJson($request), ['userId' => $request->user->id]);
+        [$product, $error] = $this->productRepository
+            ->addToCart($this->requestBodyToJson($request), $request);
 
-        [$product, $error] = $this->productRepository->addToCart($userDetails);
-
-        if ($error) return response($response, $error, $error['code']);
-
-        return response($response, $product, Response::HTTP_CREATED);
+        return ($error == null) ?
+            response($response, $product, Response::HTTP_CREATED) :
+            response($response, $error, is_array($error) ? $error['code'] : Response::HTTP_INTERNAL_SERVER_ERROR);
     }
 
     /**
@@ -70,13 +69,13 @@ class ProductsController extends BaseController
      */
     public function viewCart(Request $request, Response $response)
     {
-        if (!isAuthenticated($request)) return response($response, 'Unauthorised', Response::HTTP_UNAUTHORIZED);
+        if (!isAuthenticated($request))
+            return $this->unauthorised($response);
 
-        [$cart, $error] = $this->productRepository->getUserCart($request->user->id);
+        $carts = $this->productRepository
+            ->getUserCart($request->user->id);
 
-        if ($error) return response($response, $error, $error['code']);
-
-        return response($response, $cart, Response::HTTP_OK);
+        response($response, $carts, Response::HTTP_OK);
     }
 
     /**
@@ -84,17 +83,40 @@ class ProductsController extends BaseController
      * @param Response $response
      * @return mixed
      */
-    public function checkout(Request $request, Response $response)
+    public function verifyPayment(Request $request, Response $response)
     {
-        if (!isAuthenticated($request)) return response($response, 'Unauthorised', Response::HTTP_UNAUTHORIZED);
+        if (!isAuthenticated($request))
+            return $this->unauthorised($response);
 
-        $useCart = $this->productRepository->getUserCart($request->user->id);
+        $client = getHttp();
 
-        [$cart, $error] = $this->productRepository->checkout($useCart);
+        $body = $this->requestBodyToJson($request);
 
-        if ($error) return response($response, $error, $error['code']);
+        try {
+            $res = $client
+                ->request(
+                    'GET', 'https://api.paystack.co/transaction/verify/' . $body['reference'],
+                    [
+                        'headers' => [
+                            'Authorization' => 'Bearer ' . env('PAYSTACK_KEY')
+                        ]
+                    ])
+                ->getBody()
+                ->getContents();
 
-        return response($response, $cart, Response::HTTP_OK);
+            $res = json_decode($res);
+
+            if($res->status ==true && $res->data->status == 'success') {
+                [$payment, $error] = $this->productRepository->updatePayment($res->data, $request);
+
+                return $error ?
+                    response($response, $error, Response::HTTP_BAD_REQUEST) :
+                    response($response, $payment, Response::HTTP_OK);
+            }
+
+        } catch (GuzzleException $error) {
+            response($response, $error->getMessage(), Response::HTTP_BAD_REQUEST);
+        }
     }
 
     /**
@@ -106,11 +128,10 @@ class ProductsController extends BaseController
     {
         if (!isAuthenticated($request)) return response($response, 'Unauthorised', Response::HTTP_UNAUTHORIZED);
 
-        [$products, $error] = $this->productRepository->getProducts($request->user->id);
+        $products = $this->productRepository
+            ->getAllProducts($request->user->id);
 
-        if($error) return response($response, $error, $error['code']);
-
-        return response($response, $products, Response::HTTP_OK);
+        response($response, $products, Response::HTTP_OK);
     }
 
 }

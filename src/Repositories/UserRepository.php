@@ -2,23 +2,11 @@
 
 namespace App\Repositories;
 
-use App\Models\User;
-use Doctrine\ORM\EntityManager;
-use Doctrine\ORM\ORMException;
 use Symfony\Component\HttpFoundation\Response;
+use App\Models\User;
 
 class UserRepository extends BaseRepository
 {
-    private EntityManager $entityManager;
-
-    /**
-     * UserRepository constructor.
-     */
-    public function __construct()
-    {
-        $this->entityManager = getEntityManager();
-    }
-
     /**
      * Inserts user record to the database
      *
@@ -31,11 +19,7 @@ class UserRepository extends BaseRepository
 
         if ($error) return [null, $error];
 
-        $userRepository = $this->entityManager->getRepository('App\\Models\\User');
-
-        $exists = $userRepository->findOneBy([
-            'email' => $userInfo['email']
-        ]);
+        $exists = User::where(['email' => $userInfo['email']])->first();
 
         if ($exists) {
             return [
@@ -43,21 +27,17 @@ class UserRepository extends BaseRepository
                 ['status' => 'Failure', 'message' => 'user with email ' . $userInfo['email'] . ' already exists', 'code' => Response::HTTP_CONFLICT]
             ];
         }
-
         try {
-            $user = new User();
-
-            $user->setFirstName($userInfo['firstName']);
-            $user->setLastName($userInfo['lastName']);
-            $user->setEmail($userInfo['email']);
-            $user->setPassword(password_hash($userInfo['password'], PASSWORD_BCRYPT));
-
-            $this->entityManager->persist($user);
-            $this->entityManager->flush();
+            $user = User::create([
+                'firstName' => $userInfo['firstName'],
+                'lastName' => $userInfo['lastName'],
+                'email' => $userInfo['email'],
+                'password' => password_hash($userInfo['password'], PASSWORD_BCRYPT)
+            ]);
 
             return [$user->toArray(), null];
-        } catch (ORMException $e) {
-            var_dump($e);
+        } catch (\Exception $e) {
+            return [null, $e];
         }
 
     }
@@ -68,16 +48,9 @@ class UserRepository extends BaseRepository
 
         if ($error) return [null, $error];
 
-        $userRepository = $this->entityManager->getRepository('App\\Models\\User');
+        $user = User::where(['email' => $userInfo['email']])->first();
 
-        $user = $userRepository->findOneBy([
-            'email' => $userInfo['email']
-        ]);
-
-        var_dump($user->getProducts());
-
-
-        if ($user && password_verify($userInfo['password'], $user->getPassword())) {
+        if ($user && password_verify($userInfo['password'], $user->password)) {
             return [$user->toArray(), null];
         }
 
