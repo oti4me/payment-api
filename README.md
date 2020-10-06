@@ -50,7 +50,7 @@ A simple product payment API with recurring payment capability
 *[Click here to see the api documentation](https://documenter.getpostman.com/view/1987371/TVRhbURg)
 
 ## Limitations
-+ Users, post, cart items cannot delete user account
++ Users, Posts, and Cart items cannot be deleted
 
 ## Contributions
  Contributions are always welcome. If you are interested in enhancing the features in the project, follow these steps below:
@@ -58,7 +58,7 @@ A simple product payment API with recurring payment capability
  + Create a new branch and make features that will enhance it.
  + If you wish to update an existing feature submit a pull request.
  + If you find bugs in the application, create a `New Issue` and let me know about it.
- + If you need clarification on what is not clear, contact me via mail [henry.otighe@andela.com](mailto:h.otighe@gmail.com)
+ + If you need clarification on what is not clear, contact me via mail [h.otighe@gmail.com](mailto:h.otighe@gmail.com)
 
 ## Author
     Henry Otighe
