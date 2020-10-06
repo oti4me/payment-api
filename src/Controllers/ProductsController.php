@@ -88,12 +88,14 @@ class ProductsController extends BaseController
         if (!isAuthenticated($request))
             return $this->unauthorised($response);
 
-        $client = getHttp();
+        [$_, $error] = validatePaymentReference($this->requestBodyToJson($request));
+
+        if($error) return response($response, $error, Response::HTTP_BAD_REQUEST);
 
         $body = $this->requestBodyToJson($request);
 
         try {
-            $res = $client
+            $res = getHttp()
                 ->request(
                     'GET', 'https://api.paystack.co/transaction/verify/' . $body['reference'],
                     [
@@ -106,7 +108,7 @@ class ProductsController extends BaseController
 
             $res = json_decode($res);
 
-            if($res->status ==true && $res->data->status == 'success') {
+            if($res->status == true && $res->data->status == 'success') {
                 [$payment, $error] = $this->productRepository->updatePayment($res->data, $request);
 
                 return $error ?
