@@ -28,7 +28,7 @@ function jwtEncode($data)
         ],
     ];
 
-    return JWT::encode($payload, env('JWT_SECRET'));
+    return JWT::encode($payload, envGet('JWT_SECRET'));
 }
 
 /**
@@ -38,7 +38,7 @@ function jwtEncode($data)
 function jwtDecode($data)
 {
     try {
-        return [JWT::decode($data, env('JWT_SECRET'), array('HS256')), null];
+        return [JWT::decode($data, envGet('JWT_SECRET'), array('HS256')), null];
     }
     catch (Exception $e) {
         return [null, $e];
@@ -169,4 +169,11 @@ function setCorsHeaders($response)
     $response->headers->set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
     $response->headers->set('Access-Control-Allow-Origin', '*');
     $response->headers->set('Access-Control-Allow-Headers', 'content-type, Authorization');
+}
+
+/**
+ * @param $key
+ */
+function envGet($key) {
+    return $_ENV[$key] ?? $_SERVER[$key];
 }

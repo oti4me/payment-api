@@ -26,7 +26,7 @@ class UserControllerTest extends TestCase
             ]);
             $body = json_decode($response->getBody()->getContents())->body;
 
-            [$user, $error] = jwtDecode($body, env('JWT_SECRET'))->user;
+            [$user, $error] = jwtDecode($body, envGet('JWT_SECRET'))->user;
 
             $this->assertEquals(201, $response->getStatusCode());
             $this->assertEquals($data['email'], $user->email);
@@ -43,5 +43,4 @@ class UserControllerTest extends TestCase
 
         $this->http = new GuzzleHttp\Client(['base_uri' => 'http://localhost/']);
     }
-
 }
