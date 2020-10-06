@@ -98,7 +98,7 @@ class ProductsController extends BaseController
                     'GET', 'https://api.paystack.co/transaction/verify/' . $body['reference'],
                     [
                         'headers' => [
-                            'Authorization' => 'Bearer ' . env('PAYSTACK_KEY')
+                            'Authorization' => 'Bearer ' . envGet('PAYSTACK_KEY')
                         ]
                     ])
                 ->getBody()

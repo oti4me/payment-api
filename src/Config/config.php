@@ -16,11 +16,11 @@ function connectDB()
         $capsule = new Capsule();
 
         $capsule->addConnection([
-            'driver'    => env('DB_DRIVER'),
-            'host'      => env('DB_HOST'),
-            'username'  => env('DB_USERNAME'),
-            'password'  => env('DB_PASSWORD'),
-            'database'  => env('DB_DATABASE'),
+            'driver'    => envGet('DB_DRIVER'),
+            'host'      => envGet('DB_HOST'),
+            'username'  => envGet('DB_USERNAME'),
+            'password'  => envGet('DB_PASSWORD'),
+            'database'  => envGet('DB_DATABASE'),
             'charset'   => 'utf8',
             'collation' => 'utf8_unicode_ci',
             'prefix'    => '',
