@@ -121,6 +121,25 @@ function validateAddToCartInput($data)
 }
 
 /**
+ * @param $data
+ * @return array|null[]
+ */
+function validatePaymentReference($data)
+{
+    $v = new Validator($data);
+
+    $v->rule('required', ['reference']);
+
+    return (!$v->validate()) ?
+        [null, [
+            'status' => 'Failure',
+            'message' => 'validation error',
+            'code' => Response::HTTP_UNPROCESSABLE_ENTITY,
+            'error' => $v->errors()]] :
+        [null, null];
+}
+
+/**
  * @param $response
  * @param $data
  * @param int $statusCode
@@ -162,7 +181,7 @@ function isAuthenticated(Request $request)
 }
 
 /**
- * @param $req
+ * @param $response
  */
 function setCorsHeaders($response)
 {
@@ -173,6 +192,7 @@ function setCorsHeaders($response)
 
 /**
  * @param $key
+ * @return mixed
  */
 function envGet($key) {
     return $_ENV[$key] ?? $_SERVER[$key];

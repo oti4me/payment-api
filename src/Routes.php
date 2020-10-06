@@ -76,7 +76,7 @@ class Routes
             case '/':
                 (new WelcomeController())->index($request, $response);
                 break;
-            case '/api/v1/products/cart':
+            case '/api/v1/cart':
                 $this->productController->viewCart($request, $response);
                 break;
             case '/api/v1/products':
@@ -123,7 +123,7 @@ class Routes
             case '/api/v1/products':
                 $this->productController->addProduct($request, $response);
                 break;
-            case '/api/v1/products/add-to-cart':
+            case '/api/v1/cart':
                 $this->productController->addToCart($request, $response);
                 break;
             case '/api/v1/verify-payment':
